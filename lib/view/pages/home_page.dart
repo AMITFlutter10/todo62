@@ -4,6 +4,7 @@ import 'package:todo62/view/pages/delete_page.dart';
 import 'package:todo62/view/pages/done_page.dart';
 import 'package:todo62/view/pages/tasks_page.dart';
 
+import '../../local_data.dart';
 import '../widgets/default_form_field.dart';
 import '../widgets/default_text.dart';
 
@@ -15,6 +16,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    creteDataBase();
+    super.initState();
+  }
   int currentIndex= 0  ;
   var taskController = TextEditingController();
   var timeController = TextEditingController();
@@ -23,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   List<Widget> screens = const [
     TasksPage(),
     DonePage(),
-    DeletePage(),
+   // DeletePage(),
   ];
    List<String> titles= ["Tasks", "Done"];
 
@@ -131,7 +137,7 @@ class _HomePageState extends State<HomePage> {
             ),);
             // insert ll data   save ll data => sqflite
             // close sheet
-              
+
 
             taskController.clear();
             timeController.clear();
