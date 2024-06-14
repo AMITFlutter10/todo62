@@ -26,14 +26,21 @@ class _HomePageState extends State<HomePage> {
   var timeController = TextEditingController();
   var dateController = TextEditingController();
   var scaffoldKey = GlobalKey<ScaffoldState>();
+  var formKey = GlobalKey<FormState>();
   List<Widget> screens = const [
     TasksPage(),
     DonePage(),
    // DeletePage(),
   ];
    List<String> titles= ["Tasks", "Done"];
+   bool isBottomSheet = false;
+   IconData iconData = Icons.add;
 
    // as String  vs to String
+  void changeBottomSheet({required IconData icon , required bool isShow}){
+    isBottomSheet = isShow;
+    icon = iconData;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,70 +89,98 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.teal,
         onPressed: () {
           setState(() {
+            if(isBottomSheet){
+           if(formKey.currentState!.validate()){
+             insertDatabase(task: taskController.text ,
+                 time:  timeController.text,
+                 date: dateController.text);
+             Navigator.pop(context);
+           }}else {
+              changeBottomSheet(icon:Icons.done  , isShow: true);
             scaffoldKey.currentState!.showBottomSheet((context) =>
                 Container(
               padding: const EdgeInsets.all(16),
-              height: 230,
+              height: 300,
               decoration: BoxDecoration(
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(10)
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  DefaultFormField(
-                    controller: taskController,
-                    keyboardType: TextInputType.text,
-                    hintText: "Add Your Task",
-                  ),
-                  const  SizedBox(height: 10,),
-                  DefaultFormField(
-                    controller: timeController,
-                    keyboardType: TextInputType.text,
-                    hintText: "Time",
-                    suffixIcon: const Icon(Icons.alarm),
-                    onTap: (){
-                      showTimePicker(context: context,
-                          initialTime: TimeOfDay.now(),
-                      ).then(
-                              (value) {
-                                timeController.text =
-                                    value!.format(context);
-                              });
-                    },
-                  ),
-                  const  SizedBox(height: 10,),
-                  DefaultFormField(
-                    controller: dateController,
-                    keyboardType: TextInputType.text,
-                    hintText: "Date",
-                    suffixIcon: const Icon(Icons.calendar_month),
-                    onTap: (){
-                      showDatePicker(context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime(2025,2,4),
-                      ).then((value) {
-                        if (value != null) {
-                          dateController.text =
-                              DateFormat.yMMMd().format(value);
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    DefaultFormField(
+                      validator: (value){
+                        if(value!.isEmpty){
+                          return "please enter valid task";
                         }
-                      });},
-                  ),
-                ],
+                        return null;
+                      },
+                      controller: taskController,
+                      keyboardType: TextInputType.text,
+                      hintText: "Add Your Task",
+                    ),
+                    const  SizedBox(height: 10,),
+                    DefaultFormField(
+                      validator: (value){
+                        if(value!.isEmpty){
+                          return "please enter valid time";
+                        }
+                        return null;
+                      },
+                      controller: timeController,
+                      keyboardType: TextInputType.text,
+                      hintText: "Time",
+                      suffixIcon: const Icon(Icons.alarm),
+                      onTap: (){
+                        showTimePicker(context: context,
+                            initialTime: TimeOfDay.now(),
+                        ).then(
+                                (value) {
+                                  timeController.text =
+                                      value!.format(context);
+                                });
+                      },
+                    ),
+                    const  SizedBox(height: 10,),
+                    DefaultFormField(
+                      validator: (value){
+                        if(value!.isEmpty){
+                          return "please enter valid date";
+                        }
+                        return null;
+                      },
+                      controller: dateController,
+                      keyboardType: TextInputType.text,
+                      hintText: "Date",
+                      suffixIcon: const Icon(Icons.calendar_month),
+                      onTap: (){
+                        showDatePicker(context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2025,2,4),
+                        ).then((value) {
+                          if (value != null) {
+                            dateController.text =
+                                DateFormat.yMMMd().format(value);
+                          }
+                        });},
+                    ),
+                  ],
+                ),
               ),
-            ),);
-            // insert ll data   save ll data => sqflite
-            // close sheet
+            ),).closed.then((value) {
+              changeBottomSheet(icon: iconData, isShow: false);
+            });
 
+            // taskController.clear();
+            // timeController.clear();
+            // dateController.clear();
 
-            taskController.clear();
-            timeController.clear();
-            dateController.clear();
-
-          });
+          }});
         }, //action
-        child: const Icon(Icons.add , color: Colors.white,),
+        child:  Icon(iconData , color: Colors.white,),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.grey[100],
