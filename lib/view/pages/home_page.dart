@@ -5,11 +5,12 @@ import 'package:todo62/view/pages/done_page.dart';
 import 'package:todo62/view/pages/tasks_page.dart';
 
 import '../../local_data.dart';
+import '../constant.dart';
 import '../widgets/default_form_field.dart';
 import '../widgets/default_text.dart';
 
 class HomePage extends StatefulWidget {
-   HomePage({super.key});
+   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -18,15 +19,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   void initState() {
-    creteDataBase();
+    setState(() {
+      creteDataBase();
+    });
+
     super.initState();
   }
   int currentIndex= 0  ;
-  var taskController = TextEditingController();
-  var timeController = TextEditingController();
-  var dateController = TextEditingController();
-  var scaffoldKey = GlobalKey<ScaffoldState>();
-  var formKey = GlobalKey<FormState>();
+
   List<Widget> screens = const [
     TasksPage(),
     DonePage(),
@@ -89,10 +89,11 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.teal,
         onPressed: () {
           setState(() {
-            if(isBottomSheet){
+           if(isBottomSheet){
            if(formKey.currentState!.validate()){
-             insertDatabase(task: taskController.text ,
-                 time:  timeController.text,
+             insertDatabase(
+                 task: taskController.text ,
+                 time: timeController.text,
                  date: dateController.text);
              Navigator.pop(context);
            }}else {
@@ -100,7 +101,7 @@ class _HomePageState extends State<HomePage> {
             scaffoldKey.currentState!.showBottomSheet((context) =>
                 Container(
               padding: const EdgeInsets.all(16),
-              height: 300,
+              height: 350,
               decoration: BoxDecoration(
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(10)

@@ -10,6 +10,7 @@ creteDataBase()async{
   print(databasesPath);
   var path = join(databasesPath,"tasks.db");
   // open the database
+  print(path);
    database = await openDatabase(path, version: 1,
 
       onCreate: (Database db, int version) async {
@@ -22,7 +23,7 @@ creteDataBase()async{
       } ,
         onOpen: (db){
         print("table open");
-       // getData
+        getDatabase(db);
         });
 }
 
@@ -31,11 +32,15 @@ insertDatabase({
   String? time,
   String? date,
 })async{
+
+
    database.transaction((txn) async {
-  await  txn.rawInsert('INSERT INTO tasks(task, time, date , status) VALUES($task, $time, $date ,"NotDone")').
+
+  await  txn.rawInsert(
+      'INSERT INTO tasks(task, time, date , status) VALUES("$task", "$time", "$date", "notDone")').
   then((value) {
     print("task inserted $value Successfully ");
-    //getDatabase ==> ui
+    getDatabase(database);
   }
   ).catchError((error){
     print(error);
@@ -48,39 +53,58 @@ insertDatabase({
    String? date,
    int? id,
  })async{
-  await database.rawUpdate('UPDATE tasks SET task = ?, time = ? , date = ? ,WHERE id = ?',
+  await database.rawUpdate('UPDATE tasks SET task = ?, time = ? , date = ? WHERE id = ?',
       [task, time, date , id]).then((value) {
         print("$value is updated");
-        //getDatabase
+        getDatabase(database);
   }).catchError((error){
     print(error);
   });
  }
 
  updateStatus(String status , int id )async{
- await database.rawUpdate('UPDATE tasks SET status = ? ,WHERE id = ?',
+ await database.rawUpdate('UPDATE tasks SET status = ? WHERE id = ?',
  [status, id]).then((value) {
  print("status is updated");
- //getDatabase
+ getDatabase(database);
  }).catchError((error){
  print(error);
  });}
 
+// List<Map>tasksDone= [];
+// getStatus(){
+//   // status
+//   database.rawQuery('SELECT * FROM tasks').
+// }
 
   deleteDataBase({required int id}){
   database.rawDelete('DELETE FROM tasks WHERE id = ?', [id]).then((value) {
     print("$value is deleted ");
+    getDatabase(database);
   }).catchError((error){
     print(error);
   });
   }
 
- List<Map> itemTasks =[];
+
+ List<Map>tasksDone= [];
+ List<Map>itemTasks =[];
  getDatabase(Database database)async{
+   tasksDone = [];
+   itemTasks = [];
+    print(itemTasks);
    database.rawQuery('SELECT * FROM tasks').then((value) {
-     for(Map<String, dynamic>  element in value){
-       itemTasks.add(element);
+     print(value);
+     for(Map<String, dynamic>  element in value) {
+       if (element['status'] == 'Done') {
+         tasksDone.add(element);
+         itemTasks.add(element);
+       }
+       else {
+         itemTasks.add(element);
+       }
      }
+     print(itemTasks);
    }).catchError((error){
      print(error);
    });
